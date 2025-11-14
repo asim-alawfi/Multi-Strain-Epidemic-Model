@@ -26,10 +26,12 @@ A = [1 1 0 1;
      1 0 1 1];
 Lambda=r*y;
 AL=A*Lambda;
-dydt=Lambda.*(1-w-(1-gamma).*z)-y;
+dydt=Lambda.*(1-gamma*w-(1-gamma).*z)-y;
 dzdt=Lambda.*(1-z)-e*z;
 dwdt=(1-w).*AL-e*w;
 %%
 [fstr,erives]=dde_sym2funcs([dydt;dzdt;dwdt],[y;z;w],par,'filename','dengue_fever_sym',...
     'maxorder',2,'directional_derivative',true);
+%%
+
 
