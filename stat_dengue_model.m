@@ -19,16 +19,17 @@ par([in.r,      in.e,     in.beta,        in.mu,      in.sigma,     in.gamma,  i
     [0.1,         1,        40,           0.02,            10,         0.54         0  ];
 ndim=12;
 x0=zeros(ndim,1);
-    parbd={'min_bound',[in.gamma, 0;  in.r,-0.5],...
+    parbd={'min_bound',[in.gamma, 0;  in.r,-0.1],...
     'max_bound',   [in.gamma, 1;     in.r, 1.6],...
     'max_step',    [in.gamma, 0.01;   in.r, 0.01; 0,0.01]};
 %%
 % par(in.r)=par(in.beta)/(par(in.mu)+par(in.sigma))
 par(in.e)=par(in.mu)/(par(in.mu)+par(in.sigma));
 funcs=set_symfuncs(@dengue_fever_sym,'sys_tau',@()[]);
-%% compute and find trivial equilibri
-ex1234=permfix('stst','eq1234_0',ndim,'x','perm',[1,2,3,4])%,...
-     %  permfix('stst','eq13_24_0',ndim,'x','perm',[2,4])];
+%% Tracking a branch of equilirium points
+% We impose symmetry with respect to the permutation (1234) to avoid
+% singularity along the branch
+ex1234=permfix('stst','eq1234_0',ndim,'x','perm',[1,2,3,4])
 [fun_1234,eq_1234_0,suc]=SetupStst(funcs,...
     'parameter',par,'x',x0,...
     'contpar',in.r,'step',0.001,parbd{:},...
@@ -75,19 +76,21 @@ ev_1234=permfix('stst','p1234',ndim,'v','perm',[1,2,3,4]);
 vs_1234=check_sb(ev_1234)'
 %%
 cnd_sb=[permfix('stst','eq1234_0',ndim,'x','perm',[1,2,3,4]),...
-        permfix('stst','pv13',ndim,'v','perm',[1,3]),...
-        permfix('stst','pv24',ndim,'v','perm',[2,4])];
+        permfix('stst','pv13',ndim,'v','perm',[1,3])]%,...
+       % permfix('stst','pv24',ndim,'v','perm',[2,4])];
 cnd_13=permfix('stst','px13_24',ndim,'x','perm',[1,3]);
 sbargs={'SetupFold.usercond',cnd_sb,'SetupFold.initcond',cnd_sb};
 [fun_eq12_34,eq_13_24,suc]=SetupStstFrom_fold(funcs,eq_1234_0,bif_point(1),...
     'usercond',cnd_13,'outputfuncs',true,...
     'step',0.1,sbargs{:});
 fprintf('Branch off from symmetry breaking, keeping (13)(24) symmetry\n');
+%%
+eq_13_24.parameter.max_bound(end)=7;
 disp(eq_13_24);
 figure(1);
-eq_13_24=br_contn(fun_eq12_34,eq_13_24,200);
+eq_13_24=br_contn(fun_eq12_34,eq_13_24,50);
 eq_13_24=br_rvers(eq_13_24);
-eq_13_24=br_contn(fun_eq12_34,eq_13_24,200);
+eq_13_24=br_contn(fun_eq12_34,eq_13_24,400);
 %% compute stability
 [eq_13_24ref,eq_123tests,eq_123bifs,eq_123bifind]=...
     MonitorChange(fun_eq12_34,eq_13_24,'print_residual_info',0,'min_iterations',5);
@@ -109,15 +112,61 @@ title('Stability Analysis of Equilibria');
 %%
 figure(3);clf;ax3=gca;hold(ax3,'on');%grid(ax3,'on');
 args={'x',@(p)p.parameter(in.r),'y',@(p)p.x(1),'ax',ax3};
-Plot2dBranch(eq_13_24ref,'DisplayName','(13)','color',[0,0,0.5],args{:});
-Plot2dBranch(eq_1234_0,'DisplayName','(1234)','color',[0,0.5,0],args{:});
-xlabel(ax3,'a');ylabel(ax3,'x');
+Plot2dBranch(eq_13_24ref,'DisplayName','(13)','color',[0,0,0.4],args{:});
+Plot2dBranch(eq_1234_0,'DisplayName','(1234)','color',[0,0.4,0],args{:});
+xlabel(ax3,'r');ylabel(ax3,'y_1');
 %%
 eq_1234_0=br_remove_extracolumns(eq_1234_0);
 eq_13_24ref=br_remove_extracolumns(eq_13_24ref);
 eq_13_24=br_remove_extracolumns(eq_13_24);
-%
-save('stat_dengue_model.mat')
+save('stat_dengue_model.mat');
+%%
+%% Continue symmetry breaking in 2 parameters
+cnd_sb=[permfix('stst','px1234',ndim,'x','perm',[1,3]);...
+    permfix('stst','pv123',ndim,'v','perm',[1,3])];
+[fun_sb,eq_sb,suc]=SetupFold(funcs,eq_13_24ref,eq_123bifind(1)+1,...
+    'initcond',cnd_sb,'usercond',cnd_sb,'outputfuncs',true,...
+    'contpar',[in.r,in.beta],'dir',in.r,'step',0.1,'print_residual_info',1);
+fprintf('Initialize two-parameter continuation of  symmetry breaking\n');
+disp(eq_sb)
+figure(2);clf;ax2=gca;
+xlabel(ax2,'a');ylabel(ax2,'c_{ext}');
+eq_sb=br_contn(fun_sb,eq_sb,100,'ax',ax2);
+eq_sb=br_rvers(eq_sb);
+eq_sb=br_contn(fun_sb,eq_sb,100,'ax',ax2);
+[eq_sbref,eq_sbtests,eq_sbifs,eq_sbbifind]=MonitorChange(fun_sb,eq_sb,...
+    'printlevel',1,'print_residual_info',0,'min_iterations',5,'output','branch',...
+    'locate_trivial',@(p)[0,0,0]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % cnd_sb2=[permfix('stst','eq1234_0',ndim,'x','perm',[1,2,3,4]),...
 %         permfix('stst','pv13',ndim,'v','perm',[1,2,3,4])];
 % cnd_1234=permfix('stst','px1234',ndim,'x','perm',[1,2,3,4]);
