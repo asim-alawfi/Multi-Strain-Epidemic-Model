@@ -1,6 +1,5 @@
 clear;
-base=[pwd(),filesep(),'..',filesep(),filesep(),'DDE_Biftool_Nov2025',filesep()];
-ddebiftool_path(base,'sym');%[getenv('HOME'),'/sourceforge-ddebiftool/releases/git-2023-06-27'],'sym');
+ddebiftool_path(fullfile('ddebiftool_snapshot'),'sym');
 %%
 format compact
 format short g
