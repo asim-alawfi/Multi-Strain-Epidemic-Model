@@ -12,3 +12,5 @@
 **/.DS_Store
 **/*.xopp
 scratch
+!steady_state_y2_0.mat
+!steady_state_y2_0.mat
