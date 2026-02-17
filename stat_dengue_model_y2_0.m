@@ -199,7 +199,7 @@ ypar_13_24=arrayfun(@(p)sum(p.x(end-3:end)),eq_13_24ref.point);
 plt1_13_24=plot(xpar_13_24(z1:z2), ypar_13_24(z1:z2), '-','Color',clrs(1,:),'Linewidth',3,'MarkerSize',10);
 plt2_13_24=plot(xpar_13_24(1:z1), ypar_13_24(1:z1), '--','Color',clrs(1,:),'Linewidth',2,'MarkerSize',10);
 plot(xpar_13_24(z2:end), ypar_13_24(z2:end), '--','Color',clrs(1,:),'Linewidth',2,'MarkerSize',10);
-plot(xpar_13_24(bifind_13_24(3)), ypar_13_24(bifind_13_24(3)), '.','Color',clrs(1,:),'Linewidth',3,'MarkerSize',30);
+plot(xpar_13_24(bifind_13_24(3)), ypar_13_24(bifind_13_24(3)), '.','Color','r','Linewidth',3,'MarkerSize',30);
 hold on 
 plot(xpar_y2_0(nunst_st==0), ypar_y2_0(nunst_st==0), 'k-','Linewidth',3,'MarkerSize',10);
 plot(xpar_y2_0(nunst_st==1), ypar_y2_0(nunst_st==1), 'r.','Linewidth',2,'MarkerSize',10);
@@ -210,9 +210,10 @@ set_bif={'LineWidth',2,'Box','on','FontSize',14};
 ylim([-1,2.5])
 set(gca, set_bif{:})
 legend('k~(12)(34) unstable','','','k~(1234) unstable','','single-zero (fold)','k~(13)(24) stable','k~(13)(24) unstable',... 
-          '','double-zero', 'stable','unstable','bif with 4 zero eiganvalues','FontSize',18,'FontWeight','normal')
-xlabel('$r$','interpreter','latex','FontSize',15,FontWeight='normal')
-ylabel('$y_{1}$','interpreter','latex',FontSize=15,FontWeight='normal')
+          '','double-zero', 'stable','unstable','bif with 4 zero eiganvalues',...
+          'FontSize',17,'FontWeight','normal','location','northwest')
+xlabel('$r$','interpreter','latex','FontSize',17,FontWeight='bold')
+ylabel('$y_{1}$','interpreter','latex',FontSize=17,FontWeight='bold')
 %title('(a)');
 %%
 eq_1234ref=br_remove_extracolumns(eq_1234ref);
@@ -290,7 +291,7 @@ ax2.YTickLabel = [];
 xlim(ax2,xZoom)
 ylim(ax2,yZoom)
 legend(ax1,'$z_{1}$','$z_{2}$','$z_{3}$','$z_{4}$','Interpreter','latex','FontSize',20,'location','best')
-ax2.Color='k';
+ax2.Color='w';
 %%
 figure(100)
 clf; 
@@ -319,7 +320,7 @@ ylim(ax2,yZoom)
 legend(ax1,'$y_{1}$','$y_{2}$','$y_{3}$','$y_{4}$','Interpreter','latex','FontSize',20,'location','best')
 ax2.Color='k'
 %%
-figure(100)
+figure(101)
 clf; 
 ax1 = axes;
 hold(ax1,'on')
