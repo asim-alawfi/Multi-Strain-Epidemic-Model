@@ -70,8 +70,10 @@ eq_1234_0=br_remove_extracolumns(eq_1234_0);
 %bifurcation
 check_sb=@(cnd)SetupFold(fun_1234,eq_1234_0,biflocation(1),...
     'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true);
-%% Possible Subgroub of the group D_{4}, here we did not find an invariant subspace...
-% with repect to any of the possible subgroups of D4
+%% Possible Subgroub of the group D_{4}, 
+% here we did not find an invariant subspace ...
+% with repect to any of the possible subgroups of D4 as we can see in the
+% following:
 % {e,(13)(24)}
 ev13_24=[permfix('stst','p13',ndim,'v','perm',[1,3]),...
          permfix('stst','p24',ndim,'v','perm',[2,4])];
@@ -108,7 +110,7 @@ figure(88)
 clf;
 hold on
 plot(simulode45.x,simulode45.y(9:12,:),'LineWidth',2)
-%
+%%
 ex2_d45=[permfix('stst','eq2_d45',ndim,'x','perm',[1,3])]%;...
         % permfix('stst','eq2_d45',ndim,'x','perm',[2,4])];
 x1=simulode45.y(:,end);
@@ -136,7 +138,7 @@ Plot2dBranch(eq_1234_0,'DisplayName','(1234)','color',[0,0.3,0],args{:});
 xlabel(ax11,'r');ylabel(ax11,'y_1');
 plot(xpar_13_24(biflocation2),ypar_13_24(biflocation2),'.','MarkerSize',20)
 plot(xpar_1234(biflocation), ypar_1234(biflocation),'.','MarkerSize',20)
-% Now we check...
+%% Now we check...
 % here bifurcation near r=1
 check_sb_13_24=@(cnd)SetupFold(fun2_d45,eq2_d45_13_24,biflocation2(2),...
     'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true); 
@@ -153,7 +155,7 @@ sv_13=check_sb_13_24(ev13)'
 %
 sv_1234=check_sb(ev_1234)' % only this works
 %
-% here bifurcation near r=2.1
+%% here bifurcation near r=2.1
 check_sb_13_24=@(cnd)SetupFold(fun2_d45,eq2_d45_13_24,biflocation2(1),...
     'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true); 
 % Possible Subgroub of the group D_{4}, here we did not find an invariant subspace...
@@ -173,7 +175,7 @@ eq2_d45_13_24=br_remove_extracolumns(eq2_d45_13_24);
 %% Branching off in different directions
 %On our branch solutions satisfy (13)(24)
 cnd_sb_13_24=[permfix('stst','eq2_d45',ndim,'x','perm',[2,4]),...
-        permfix('stst','eq2_d45',ndim,'v','perm',[2,4])];
+              permfix('stst','eq2_d45',ndim,'v','perm',[2,4])];
 cnd_24=permfix('stst','p24',ndim,'x','perm',[2,4]);
 sbargs={'SetupFold.usercond',cnd_sb_13_24,'SetupFold.initcond',cnd_sb_13_24};
 [fun_eq24,eq_24,suc_24]=SetupStstFrom_fold(fun2_d45,eq2_d45_13_24,biflocation2(1),...
@@ -190,7 +192,7 @@ biflocation_24=find(diff(nunst_24))
 %%
 cnd_sb_13_24=[permfix('stst','eq2_d45',ndim,'x','perm',[1,3]),...
               permfix('stst','eq2_d45',ndim,'x','perm',[2,4]),...
-        permfix('stst','eq2_d45',ndim,'v','perm',[1,2,3,4])];
+              permfix('stst','eq2_d45',ndim,'v','perm',[1,2,3,4])];
 cnd_1234=permfix('stst','p24',ndim,'x','perm',[1,2,3,4]);
 sbargs={'SetupFold.usercond',cnd_sb_13_24,'SetupFold.initcond',cnd_sb_13_24};
 [fun_eq1234,eq2_1234,suc_1234]=SetupStstFrom_fold(fun2_d45,eq2_d45_13_24,biflocation2(2),...
@@ -208,7 +210,7 @@ biflocation_1234=find(diff(nunst_1234));
 figure(3);clf;ax3=gca;hold(ax3,'on');grid(ax3,'on');set(ax3,'fontsize',16);
 args={'x',@(p)p.parameter(in.r),'y',@(p)p.x(1),'ax',ax3};
 Plot2dBranch(eq2_d45_13_24,'DisplayName','(13)(24)_ic_ode45','color',[0.2,0,0],args{:});
-Plot2dBranch(eq_24,'DisplayName','(24)_ic_ode45','color',[0.,0,0.4],args{:});
+Plot2dBranch(eq_24,'DisplayName','(24)_ic_ode45','color',[0.,0,0.0],args{:});
 Plot2dBranch(eq2_1234,'DisplayName','(1234)_br2','color',[0,0.3,0],args{:});
 Plot2dBranch(eq_1234_0,'DisplayName','(1234)','color',[0.3,0.3,0.3],args{:});
 plot(xpar_13_24(biflocation2),ypar_13_24(biflocation2),'.','MarkerSize',20)
