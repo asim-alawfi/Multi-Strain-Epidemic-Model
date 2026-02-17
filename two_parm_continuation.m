@@ -45,8 +45,8 @@ sv_12_34_y0=check_sb2([ev12_34,y2veq0])';
 sv_13_y0=check_sb2([ev13,v2veq0]);
 %%
 fold_constrains=[ev13,v2veq0];%[ev13_24,y2veq0];
- parbd_fld={'min_bound',[in.gamma, 0;  in.r,0.0],...
-    'max_bound',   [in.gamma, 4;     in.r, 10],...
+ parbd_fld={'min_bound',[in.gamma, -2;  in.r,-4],...
+    'max_bound',   [in.gamma, 4;     in.r, 7],...
     'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
 [funsfold_13,fld_branch_13,suc]=SetupFold(fun_eq13_24,eq_13_24ref,bifind_13_24(3),...
     'initcond',fold_constrains,'usercond',fold_constrains,'outputfuncs',true,...
@@ -55,33 +55,57 @@ fold_constrains=[ev13,v2veq0];%[ev13_24,y2veq0];
 figure(9)
 clf
 hold on
-fld_branch_13=br_contn(funsfold_13,fld_branch_13,200);
+fld_branch_13=br_contn(funsfold_13,fld_branch_13,500);
 fld_branch_13=br_rvers(fld_branch_13);
-fld_branch_13=br_contn(funsfold_13,fld_branch_13,200);
+fld_branch_13=br_contn(funsfold_13,fld_branch_13,400);
 %%
-[fld_branch_13ref,fold_tests,fold_bifs,fold_bifind]=MonitorChange(funsfold_13,fld_branch_13,...
+[fld_branch_13ref,fold_nunst,fold_bifs,fold_bifind]=MonitorChange(funsfold_13,fld_branch_13,...
     'printlevel',1,'print_residual_info',0,'min_iterations',5,'output','branch',...
-    'locate_trivial',@(p)[1 1]);
+    'locate_trivial',@(p)[0 0]);
+%%
+yparf=arrayfun(@(p)sum(p.x(end-3:end)),fld_branch_13ref.point);
+clrs=lines();
+xpar_fld=arrayfun(@(x)x.parameter(in.r),fld_branch_13ref.point);
+ypar_fld=arrayfun(@(x)x.parameter(in.gamma),fld_branch_13ref.point);
+figure(11)
+clf;
+hold on
+plot(xpar_fld(fold_nunst==0),ypar_fld(fold_nunst==0),'--','Color','r','LineWidth',2)
+plot(xpar_fld(fold_nunst>=1),ypar_fld(fold_nunst>=1),'--','Color','g','LineWidth',2)
 %% simulation near the fold-fold bif
 pt=eq_13_24ref.point(bifind_13_24(3));
 opts = odeset('RelTol',1e-6,'AbsTol',1e-9);
 Fode45=@(t,X)funcs.wrap_rhs(X,pt.parameter);
 rng(1)
-simulode45=ode45(Fode45,[0,20000],pt.x+0.01*rand(length(pt.x),1),opts);
+simulode45=ode45(Fode45,[0,1e6],pt.x+0.01*rand(length(pt.x),1),opts);
 %%
 figure(88)
 clf;
 tiledlayout(1,3)
 nexttile
 hold on
-plot(simulode45.x,simulode45.y(1:4,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(1,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(3,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(2,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(4,:),'LineWidth',2)
 ylabel('$y_{i}$','FontSize',16,'Interpreter','latex')
 nexttile 
 hold on
-plot(simulode45.x,simulode45.y(5:8,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(5,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(7,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(6,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(8,:),'LineWidth',2)
+
 ylabel('$z_{i}$','FontSize',16,'Interpreter','latex')
 
 nexttile
 hold on
-plot(simulode45.x,simulode45.y(9:12,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(9,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(11,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(10,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(12,:),'LineWidth',2)
+
+
 ylabel('$w_{i}$','FontSize',16,'Interpreter','latex')
+%%
+save('two-parameter_computation.mat')
