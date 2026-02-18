@@ -67,28 +67,30 @@ yparf=arrayfun(@(p)sum(p.x(end-3:end)),fld_branch_13ref.point);
 clrs=lines();
 xpar_fld=arrayfun(@(x)x.parameter(in.r),fld_branch_13ref.point);
 ypar_fld=arrayfun(@(x)x.parameter(in.gamma),fld_branch_13ref.point);
+%%
 figure(11)
 clf;
 hold on
-plot(xpar_fld(fold_nunst==0),ypar_fld(fold_nunst==0),'--','Color','r','LineWidth',2)
-plot(xpar_fld(fold_nunst>=1),ypar_fld(fold_nunst>=1),'--','Color','g','LineWidth',2)
+plot(xpar_fld(fold_nunst==0),ypar_fld(fold_nunst==0),'--','Color',clrs(1,:),'LineWidth',2)
+plot(xpar_fld(fold_nunst>=1),ypar_fld(fold_nunst>=1),'--','Color',clrs(2,:),'LineWidth',2)
 %% simulation near the fold-fold bif
 pt=eq_13_24ref.point(bifind_13_24(3));
-opts = odeset('RelTol',1e-6,'AbsTol',1e-9);
+opts = odeset('RelTol',1e-6,'AbsTol',1e-6);
 Fode45=@(t,X)funcs.wrap_rhs(X,pt.parameter);
-rng(1)
-simulode45=ode45(Fode45,[0,1e6],pt.x+0.01*rand(length(pt.x),1),opts);
-%%
+rng(4)
+simulode45=ode45(Fode45,[0,1e5],pt.x+0.02*rand(length(pt.x),1),opts);
+
 figure(88)
 clf;
-tiledlayout(1,3)
-nexttile
+%tiledlayout(1,3)
+%nexttile
 hold on
 plot(simulode45.x,simulode45.y(1,:),'LineWidth',2)
 plot(simulode45.x,simulode45.y(3,:),'LineWidth',2)
 plot(simulode45.x,simulode45.y(2,:),'LineWidth',2)
 plot(simulode45.x,simulode45.y(4,:),'LineWidth',2)
 ylabel('$y_{i}$','FontSize',16,'Interpreter','latex')
+%%
 nexttile 
 hold on
 plot(simulode45.x,simulode45.y(5,:),'LineWidth',2)
@@ -109,3 +111,36 @@ plot(simulode45.x,simulode45.y(12,:),'LineWidth',2)
 ylabel('$w_{i}$','FontSize',16,'Interpreter','latex')
 %%
 save('two-parameter_computation.mat')
+%%
+ev13=permfix('stst','p13',ndim,'v','perm',[1,3]);
+
+% y2veq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(x)x,'args',{'x',3});
+%alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
+cndv_13_24=[permfix('stst','p13',nstrains,'v','perm',[1,3]),...
+           permfix('stst','p24',nstrains,'v','perm',[2,4])];
+cnd_13=permfix('stst','p13',nstrains,'x','perm',[1,3]);
+%y3eq0=dde_sys_cond_create('name','y3eq0','reference',false,'fun',@(x)x,'args',{'x',2});
+sbargs={'SetupFold.usercond',[ev13],'SetupFold.initcond',[ev13]};
+[fun_eq13,eq_13,suc_13]=SetupStstFrom_fold(fun_eq13_24,eq_13_24ref,bifind_13_24(3),...
+    'usercond',[cnd_13],'outputfuncs',true,'contpar',in.r,...
+    'step',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)sum(p(end).x(end))})
+fprintf('Branch off from symmetry breaking, keeping (13)(24) symmetry\n');
+%%
+eq_13.parameter.max_bound(end)=5;
+figure(1)
+hold on
+eq_13=br_contn(fun_eq13,eq_13,100);
+%%
+eq_13=br_rvers(eq_13);
+eq_13=br_contn(fun_eq13,eq_13,100);
+
+[eq_13ref,eq_13tests,bifs_13,bifind_13]=...
+    MonitorChange(fun_eq13,eq_13,'min_iterations',5);
+xpar_13=arrayfun(@(x)x.parameter(in.r),eq_13ref.point);
+ypar_13=arrayfun(@(p)sum(p.x(end-3:end)),eq_13ref.point);
+%%
+figure(1)
+hold on
+plt1_12_34=plot(xpar_13(eq_13tests==0), ypar_13(eq_13tests==0),'-','Color','red','Linewidth',3,'MarkerSize',10);
+plt2_12_34=plot(xpar_13(eq_13tests>=1), ypar_13(eq_13tests>=1), '.','Color',0.5*[1 1 1],'Linewidth',3,'MarkerSize',10);
+plot(xpar_13(bifind_13), ypar_13(bifind_13), 'g.','Linewidth',3,'MarkerSize',30);
