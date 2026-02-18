@@ -29,12 +29,6 @@ if ~isfield(sol,'xe') || length(sol.xe)<2
         'solution structure does not contain two Poincare cross section events');
 end
 period=sol.xe(end)-sol.xe(end-1);
-% t = linspace(sol.x(1), sol.x(end), 1e5);
-% X = deval(sol, t);
-% 
-% y = X(1,:);                         % choose an oscillatory component
-% [pks, locs] = findpeaks(y, t);      %#ok<ASGLU>
-% period= median(diff(locs(end-min(10,numel(locs)-1)+1:end)));
 %%
 per0=dde_psol_create('kind','psol','parameter',parameters,'mesh',[],'degree',options.degree,'profile',[],...
     'period',period);   
