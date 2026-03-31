@@ -39,12 +39,12 @@ sv_1234=check_sb2(ev_1234)'
 %y2veq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(v)v,'args',{'x',3});
 
 %%
-v2veq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(v)v,'args',{'v',2});
-sv_13_24_y0=check_sb2([ev13_24,v2veq0])';
-sv_12_34_y0=check_sb2([ev12_34,y2veq0])';
-sv_13_y0=check_sb2([ev13,v2veq0]);
+v3veq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(v)v,'args',{'v',3});
+sv_13_24_y0=check_sb2([ev13_24,v3veq0])';
+sv_12_34_y0=check_sb2([ev12_34,v3veq0])';
+sv_13_y0=check_sb2([ev13,v3veq0])
 %%
-fold_constrains=[ev13,v2veq0];%[ev13_24,y2veq0];
+fold_constrains=[ev13,v3veq0];%[ev13_24,y2veq0];
  parbd_fld={'min_bound',[in.gamma, -2;  in.r,-4],...
     'max_bound',   [in.gamma, 4;     in.r, 7],...
     'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
@@ -62,7 +62,7 @@ fld_branch_13=br_contn(funsfold_13,fld_branch_13,400);
 [fld_branch_13ref,fold_nunst,fold_bifs,fold_bifind]=MonitorChange(funsfold_13,fld_branch_13,...
     'printlevel',1,'print_residual_info',0,'min_iterations',5,'output','branch',...
     'locate_trivial',@(p)[0 0]);
-%%
+%
 yparf=arrayfun(@(p)sum(p.x(end-3:end)),fld_branch_13ref.point);
 clrs=lines();
 xpar_fld=arrayfun(@(x)x.parameter(in.r),fld_branch_13ref.point);
@@ -71,8 +71,8 @@ ypar_fld=arrayfun(@(x)x.parameter(in.gamma),fld_branch_13ref.point);
 figure(11)
 clf;
 hold on
-plot(xpar_fld(fold_nunst==0),ypar_fld(fold_nunst==0),'--','Color',clrs(1,:),'LineWidth',2)
-plot(xpar_fld(fold_nunst>=1),ypar_fld(fold_nunst>=1),'--','Color',clrs(2,:),'LineWidth',2)
+plot(xpar_fld(fold_nunst==0),ypar_fld(fold_nunst==0),'-','Color',0.0*[1 1 1],'LineWidth',3)
+plot(xpar_fld(fold_nunst>=1),ypar_fld(fold_nunst>=1),'--','Color',0.5*[1 1 1],'LineWidth',3)
 %% simulation near the fold-fold bif
 pt=eq_13_24ref.point(bifind_13_24(3));
 opts = odeset('RelTol',1e-6,'AbsTol',1e-6);
@@ -107,7 +107,7 @@ plot(simulode45.x,simulode45.y(11,:),'LineWidth',2)
 plot(simulode45.x,simulode45.y(10,:),'LineWidth',2)
 plot(simulode45.x,simulode45.y(12,:),'LineWidth',2)
 
-
+%%
 ylabel('$w_{i}$','FontSize',16,'Interpreter','latex')
 %%
 save('two-parameter_computation.mat')
