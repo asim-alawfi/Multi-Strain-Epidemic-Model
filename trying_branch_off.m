@@ -75,6 +75,18 @@ nexttile
 hold on
 plot(simulode45.x,simulode45.y(8,:),'LineWidth',2)
 %%
+cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])];
+cndv_24=[permfix('stst','p13',nstrains,'v','perm',[2,4])];
+cndv_13_24=[permfix('stst','p13',nstrains,'v','perm',[1,3]),...
+           permfix('stst','p24',nstrains,'v','perm',[2,4])];
+cnd_13_24=[permfix('stst','p13',nstrains,'x','perm',[1,3]),...
+           permfix('stst','p24',nstrains,'x','perm',[2,4])];
+y2veq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(x)x,'args',{'v',2});
+check_sb=@(cnd)SetupFold(funcs,eq_13_24ref,bifind_13_24(3),...
+    'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true);
+sv_13_y2eq0=check_sb([cndv_13,y2veq0])
+sv_24=check_sb([cndv_24])
+%%
 y3veq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(x)x,'args',{'v',3});
 y1veq0=dde_sys_cond_create('name','y1_eq0','reference',false,'fun',@(x)x,'args',{'v',1});
 alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
