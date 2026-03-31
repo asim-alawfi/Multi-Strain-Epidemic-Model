@@ -90,11 +90,11 @@ sv_24=check_sb([cndv_24])
 y3veq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(x)x,'args',{'v',3});
 y1veq0=dde_sys_cond_create('name','y1_eq0','reference',false,'fun',@(x)x,'args',{'v',1});
 alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
-cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])]%,...
+cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])];%,...
            %permfix('stst','p24',nstrains,'v','perm',[2,4])];
-cnd_13=[permfix('stst','p13',nstrains,'x','perm',[1,3])]%,...
+cnd_13=[permfix('stst','p13',nstrains,'x','perm',[1,3])];%,...
           %permfix('stst','p24',nstrains,'x','perm',[2,4])];
-y3eq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(x)x,'args',{'x',3});
+y3eq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(x)x,'args',{'x',2});
 y1eq0=dde_sys_cond_create('name','y1_eq0','reference',false,'fun',@(x)x,'args',{'x',1});
 
 sbargs={'SetupFold.usercond',[cndv_13,y3veq0],'SetupFold.initcond',[cndv_13,y3veq0]};
@@ -108,7 +108,18 @@ check_sb=@(cnd)SetupFold(funcs,eq_13_24ref,bifind_13_24(3),...
 sv_13_y0=check_sb([cndv_13,y3veq0])'
 %%
 % %
-% figure(1)
-% hold on
-% eq_13_24=br_contn(fun_eq13_24,eq_13,100);
+figure(10)
+hold on
+eq_24=br_contn(fun_eq24,eq_24,100);
+%
+eq_24=br_rvers(eq_24)
+eq_24=br_contn(fun_eq24,eq_24,100);
 %%
+[eq_24ref,eq_24tests,bifs_13,bifind_13]=...
+    MonitorChange(fun_eq24,eq_24,'min_iterations',5);
+%%
+xpar_13=arrayfun(@(x)x.parameter(in.r),eq_24ref.point);
+ypar_13=arrayfun(@(p)sum(p.x(end-3:end)),eq_24ref.point);
+figure(10)
+plot(xpar_13(eq_24tests==0),ypar_13(eq_24tests==0),'k.','LineWidth',3,'MarkerSize',10)
+plot(xpar_13(eq_24tests>=1),ypar_13(eq_24tests>=1),'r.','LineWidth',3,'MarkerSize',10)
