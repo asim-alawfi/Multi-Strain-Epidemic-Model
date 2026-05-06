@@ -64,8 +64,22 @@ clf;
 %tiledlayout(1,4)
 %nexttile
 hold on
-plot(simulode45.x,simulode45.y(5:8,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(5,:),'ko','LineWidth',2)
+plot(simulode45.x,simulode45.y(7,:),'bx','LineWidth',2)
 
+plot(simulode45.x,simulode45.y(6,:),'r.','MarkerSize',10,'LineWidth',2)
+plot(simulode45.x,simulode45.y(8,:),'s','LineWidth',2)
+%%
+figure(90)
+clf;
+%tiledlayout(1,4)
+%nexttile
+hold on
+plot(simulode45.x,simulode45.y(1,:),'ko','LineWidth',2)
+plot(simulode45.x,simulode45.y(3,:),'bx','LineWidth',2)
+
+plot(simulode45.x,simulode45.y(2,:),'r.','MarkerSize',10,'LineWidth',2)
+plot(simulode45.x,simulode45.y(4,:),'s','LineWidth',2)
 
 %%
 save('run_ode45.mat')
