@@ -6,7 +6,7 @@
 %     direction = [+1;+1;+1];           % +1 upward crossing, -1 downward, 0 both
 % end
 %%
-function [value, isterminal, direction] = MyEvent(t,y)
+function [value, isterminal, direction] = MyEvent(y)
     value = y(5) - 0.3;% scalar event function
     isterminal = 0;          % 0 = do NOT stop, 1 = stop
     direction = +1    ;       % +1 upward crossing, -1 downward, 0 both

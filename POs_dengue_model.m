@@ -53,7 +53,7 @@ ylabel('$y_{1}$','interpreter','latex',FontSize=17,FontWeight='bold')
 %title('(a)');
 %%
 pt=eq_13_24ref.point(bifind_13_24(3));
-pt.parameter(in.r)=pt.parameter(in.r)+0.2;
+pt.parameter(in.r)=pt.parameter(in.r)+0.5;
 opts = odeset('RelTol',1e-8,'AbsTol',1e-9,'Events',@(t,x)MyEvent(x));
 Fode45=@(t,X)funcs.wrap_rhs(X,pt.parameter);
 rng(1)
@@ -95,13 +95,12 @@ alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args'
 %            permfix('stst','p24',nstrains,'v','perm',[2,4])];
 cnd_13_24=[permfix('psol','p13',nstrains,'profile','perm',[1,3]),...
            permfix('psol','p24',nstrains,'profile','perm',[2,4])];
-[funcs_psol,psol_12_34,suc]=branch_from_ode45sol(fun_eq13_24,simulode45,in.r,par,...
-    'phase_condition',0,'matrix','sparse','stability.eigmatrix','sparse',parbd{:},...
+[funcs_psol,psol_12_34,suc]=branch_from_ode45sol(funcs,simulode45,in.r,par,...
+    'phase_condition',0,'matrix','sparse','stability.eigmatrix','sparse',parbd{:},'step',1e-5,...
     'degree',6,'intervals',80,'newton_max_iterations',8,...
-    'adapt_mesh_after_correct',1,...
-    'usercond',{psolsym},'outputfuncs',true);
+    'adapt_mesh_after_correct',1, 'usercond',[],'outputfuncs',true);
 %%
 figure(17)
-clf
+%clf
 hold on
-psol_12_34=br_contn(funcs_psol,psol_12_34,5);
+psol_12_34=br_contn(funcs_psol,psol_12_34,10);

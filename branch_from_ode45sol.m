@@ -56,5 +56,5 @@ if ~suc
         '2nd correction failed: suc=%d',suc);
 end
 branch.point=[per2,per3];
-varargout=dde_setupoutput(funcs,branch,suc,options.outputfuncs);
+varargout=dde_setupoutput('Setup',funcs,branch,suc,options.outputfuncs);
 end
