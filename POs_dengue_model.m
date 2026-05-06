@@ -101,6 +101,6 @@ cnd_13_24=[permfix('psol','p13',nstrains,'profile','perm',[1,3]),...
     'adapt_mesh_after_correct',1, 'usercond',[],'outputfuncs',true);
 %%
 figure(17)
-%clf
+clf
 hold on
 psol_12_34=br_contn(funcs_psol,psol_12_34,10);
