@@ -73,6 +73,17 @@ y13_240=permute(cat(3,y13_240{:}),[1,3,2]);
 [x13_240,par13_240,stab13_240]=x_eq_from_y(r_rgfine,y13_240,A,par0,in,FJ);
 plt13_240args=[repmat({r_rgfine},size(y13_240,3),1),squeeze(num2cell(y13_240(1,:,:),[1,2]))].';
 plot(ax,plt13_240args{:});drawnow
+%% y2=y3=y4=0 equilibria
+y_eqn_2340=numden(simplify(subs(simplify(y_eqn(1)./y(1)),y(2:4),[0;0;0])));
+y_eqn_2340=numden(simplify(y_eqn_2340));
+info_2340=reduce_grobner(y_eqn_2340,y(1),[r,g]);
+[info_2340.target,info_2340.factor,info_2340.source]=deal(...
+    [2,3,4],          [0,0,0],          [1,1,1]);
+y_2340=arrayfun(@(r){get_eq_grobner(r,g_n,info_2340,true)},r_rgfine);
+y_2340=permute(cat(3,y_2340{:}),[1,3,2]);
+[x_2340,par_2340,stab_2340]=x_eq_from_y(r_rgfine,y_2340,A,par0,in,FJ);
+plt_2340args=[repmat({r_rgfine},size(y_2340,3),1),squeeze(num2cell(y_2340(1,:,:),[1,2]))].';
+plot(ax,plt_2340args{:});drawnow
 %% bifurcation of y1=y3,y2=y4=0 equilibrium at r>0
 ys_13_240=solve(y_eqn_13_240(1),y(1)); % find non-zero solution y
 fprintf('Equilibrium with y1=y3,y2=y4=0: y1=%s\n',char(ys_13_240));
