@@ -8,6 +8,7 @@ end
 gb=gbasis(y_eqn_poly,y,'MonomialOrder','lexicographic').';
 %% gb(1) to gb(end-1) are expressing y(i) as a function of y(end)
 ny=length(y);
+[fun,sol]=deal(cell(1,ny-1));
 for i=ny-1:-1:1
     sol{i}=solve(gb(i),y(i));
     fun{i}=matlabFunction(sol{i},'Vars',[y(ny),pars]);
@@ -15,6 +16,7 @@ end
 gbf=factor(gb(end));
 degs=poly_deg(gbf,y(ny));
 gbfpolys=gbf(degs>0);
+[cfsym,cf]=deal(cell(1,length(gbfpolys)));
 for i=length(gbfpolys):-1:1
     cfsym{i}=coeffs(gbfpolys(i),y(ny),'All');
     cf{i}=matlabFunction(cfsym{i},'Vars',pars);
