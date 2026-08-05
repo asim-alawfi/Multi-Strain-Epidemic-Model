@@ -22,7 +22,7 @@
 %%
 function varargout=branch_from_ode45sol(funcs,sol,free_par_ind,parameters,varargin)
 default={'degree',4,'intervals',80,'corpar',[],'step',1e-2,'indperiod',[],'stepcond',[],...
-    'outputfuncs',false,'usercond',[]};
+    'outputfuncs',false,'usercond',[],'grid','linear'};
 [options,pass_on]=dde_set_options(default,varargin,'pass_on');
 if ~isfield(sol,'xe') || length(sol.xe)<2
     error('branch_from_sol:cross_section',...
@@ -35,7 +35,8 @@ per0=dde_psol_create('kind','psol','parameter',parameters,'mesh',[],'degree',opt
 if ~isempty(options.indperiod)
     per0.parameter(options.indperiod)=period;
 end
-per0.mesh=linspace(0,1,options.degree*options.intervals+1);
+tcoarse=linspace(0,1,options.intervals+1);
+per0.mesh=dde_coll_meshfill(tcoarse,options.degree,'grid',options.grid);
 solmesh=sol.xe(end-1)+per0.mesh*per0.period;
 per0.profile=deval(sol,solmesh);
 per1=per0;

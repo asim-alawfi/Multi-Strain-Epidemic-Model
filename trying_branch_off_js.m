@@ -53,27 +53,27 @@ ylabel('$y_{1}$','interpreter','latex',FontSize=17,FontWeight='bold')
 %title('(a)');
 %%
 pt=eq_13_24ref.point(bifind_13_24(3));
-pt.parameter(in.r)=pt.parameter(in.r)+0.2 
+pt.parameter(in.r)=pt.parameter(in.r)+0.0125; 
 opts = odeset('RelTol',1e-6,'AbsTol',1e-9);
 Fode45=@(t,X)funcs.wrap_rhs(X,pt.parameter);
 rng(1)
-simulode45=ode45(Fode45,[0,1e5],pt.x+0.001*rand(length(pt.x),1),opts);
+simulode45=ode45(Fode45,[0,4e5],pt.x+0.001*rand(length(pt.x),1),opts);
 %%
 figure(88)
 clf;
-tiledlayout(1,4)
+tiledlayout(1,1)
 nexttile
 hold on
-plot(simulode45.x,simulode45.y(5,:),'LineWidth',2)
-nexttile 
-hold on
-plot(simulode45.x,simulode45.y(6,:),'LineWidth',2)
-nexttile
-hold on
-plot(simulode45.x,simulode45.y(7,:),'LineWidth',2)
-nexttile
-hold on
-plot(simulode45.x,simulode45.y(8,:),'LineWidth',2)
+plot(simulode45.x,simulode45.y(5:8,:),'LineWidth',2)
+% nexttile 
+% hold on
+% plot(simulode45.x,simulode45.y(6,:),'LineWidth',2)
+% nexttile
+% hold on
+% plot(simulode45.x,simulode45.y(7,:),'LineWidth',2)
+% nexttile
+% hold on
+% plot(simulode45.x,simulode45.y(8,:),'LineWidth',2)
 %%
 cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])];
 cndv_24=[permfix('stst','p13',nstrains,'v','perm',[2,4])];
@@ -84,20 +84,55 @@ cnd_13_24=[permfix('stst','p13',nstrains,'x','perm',[1,3]),...
 y2veq0=dde_sys_cond_create('name','y2v_eq0','reference',false,'fun',@(x)x,'args',{'v',2});
 check_sb=@(cnd)SetupFold(funcs,eq_13_24ref,bifind_13_24(3),...
     'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true);
-sv_13_y2eq0=check_sb([cndv_13,y2veq0])
-sv_24=check_sb(cndv_24)
+[sv_13_y2eq0,v13]=check_sb([cndv_13,y2veq0])
+[sv_24,v24]=check_sb(cndv_24)
+%% try and enforce deviation
+pt=eq_13_24ref.point(bifind_13_24(3));
+ip=in;
+ip.dev=8:11;
+pt.parameter(ip.dev)=0;
+cnd_24=[permfix('stst','pv24',nstrains,'x','perm',[2,4])];%,...
+cnd_13dev=[permfix('stst','p13dev',nstrains,'x','perm',[1,3],'res_parameters',ip.dev)];%,...
+devfix=dde_cond_parameter('name','devfix',[ip.dev(1),0.01]);
+%%
+%y2veq0=dde_sys_cond_create('name','y2v_eq0','reference',false,'fun',@(x)x,'args',{'v',2});
+%y2eq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(x)x,'args',{'x',2});
+cndv_24=[permfix('stst','p24',nstrains,'v','perm',[2,4])]%,...
+%permfix('stst','p24',nstrains,'v','perm',[2,4])];
+cnd_24=[permfix('stst','pv24',nstrains,'x','perm',[2,4])]%,...
+cnd40=dde_sys_cond_create('name','y4_eq0','reference',false,'fun',@(x)x,'args',{'x',4});
+%permfix('stst','p24',nstrains,'x','perm',[2,4])];
+cnd_13dev=[permfix('stst','p13dev',nstrains,'x','perm',[1,3],'res_parameters',0.01)];%,...
+%permfix('stst','p24',nstrains,'x','perm',[2,4])];
+sbargs={'SetupFold.usercond',[cnd_13_24,cndv_24],'SetupFold.initcond',[cndv_24],'SetupFold.use_tangent',true};
+[fun_eq13,eq_13,suc_13]=SetupStstFrom_fold(funcs,eq_13_24ref,bifind_13_24(3),...
+    'usercond',[cnd_24,cnd40],'outputfuncs',true,'print_residual_info',1,...
+    'radius',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},'print_residual',true)
+fprintf('Branch off from symmetry breaking, keeping (24) symmetry\n');
+%%
+%y2veq0=dde_sys_cond_create('name','y2v_eq0','reference',false,'fun',@(x)x,'args',{'v',2});
+%y2eq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(x)x,'args',{'x',2});
+cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])]%,...
+           %permfix('stst','p24',nstrains,'v','perm',[2,4])];
+cnd_13=[permfix('stst','pv13',nstrains,'x','perm',[1,3])]%,...
+          %permfix('stst','p24',nstrains,'x','perm',[2,4])];
+sbargs={'SetupFold.usercond',[cnd_13_24,cndv_13],'SetupFold.initcond',[cndv_13]};
+[fun_eq24,eq_24,suc_24]=SetupStstFrom_fold(funcs,eq_13_24ref,bifind_13_24(3),...
+    'usercond',[cnd_13],'outputfuncs',true,'print_residual_info',1,...
+    'radius',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},'print_residual',true)
+fprintf('Branch off from symmetry breaking, keeping (13) symmetry\n');
 %%
 y2veq0=dde_sys_cond_create('name','y2v_eq0','reference',false,'fun',@(x)x,'args',{'v',2});
 y2eq0=dde_sys_cond_create('name','y2_eq0','reference',false,'fun',@(x)x,'args',{'x',2});
-cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])]%,...
-           %permfix('stst','p24',nstrains,'v','perm',[2,4])];
-cnd_13=[permfix('stst','p13',nstrains,'x','perm',[1,3])]%,...
-          %permfix('stst','p24',nstrains,'x','perm',[2,4])];
-sbargs={'SetupFold.usercond',[cnd_13_24,y2eq0,cndv_13,y2veq0],'SetupFold.initcond',[cndv_13,y2veq0]};
-[fun_eq24,eq_24,suc_24]=SetupStstFrom_fold(funcs,eq_13_24ref,bifind_13_24(3),...
-    'usercond',[cnd_13,y2eq0],'outputfuncs',true,'print_residual_info',1,...
-    'step',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},'print_residual',true)
-fprintf('Branch off from symmetry breaking, keeping (13) symmetry\n');
+%cndv_13=[permfix('stst','p13',nstrains,'v','perm',[1,3])]%,...
+%           %permfix('stst','p24',nstrains,'v','perm',[2,4])];
+%cnd_13=[permfix('stst','pv13',nstrains,'x','perm',[1,3])]%,...
+%          %permfix('stst','p24',nstrains,'x','perm',[2,4])];
+sbargs={'SetupFold.usercond',[y2eq0,y2veq0],'SetupFold.initcond',[y2eq0,y2veq0]};
+[fun_eq0,eq_0,suc_0]=SetupStstFrom_fold(funcs,eq_13_24ref,bifind_13_24(3),...
+    'usercond',[y2eq0],'outputfuncs',true,'print_residual_info',1,...
+    'radius',0.01,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},'print_residual',true)
+fprintf('Branch off from symmetry breaking, keeping y2=0\n');
 %%
 check_sb=@(cnd)SetupFold(funcs,eq_13_24ref,bifind_13_24(3),...
     'initcond',cnd,'usercond',cnd,'output','sv','outputfuncs',true);

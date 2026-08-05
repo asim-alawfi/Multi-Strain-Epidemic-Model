@@ -14,13 +14,13 @@ xpar_12_34=arrayfun(@(x)x.parameter(in.r),eq_12_34ref.point);
 ypar_12_34=arrayfun(@(p)sum(p.x(end-3:end)),eq_12_34ref.point);
 %figure(33)
 
- %%%%%%
+%% %%%%
 
 zro1=find(eq_1234tests==0,1,'first');
 one1=find(eq_1234tests==1,1,'last');
 xpar_1234=arrayfun(@(x)x.parameter(in.r),eq_1234ref.point);
 ypar_1234=arrayfun(@(p)sum(p.x(end-3:end)),eq_1234ref.point);
-%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%
 z1=find(eq_13_24tests==0,1,'first');
 z2=find(eq_13_24tests==0,1,'last');
 xpar_13_24=arrayfun(@(x)x.parameter(in.r),eq_13_24ref.point);
@@ -49,16 +49,16 @@ s=linspace(0,1,12);
 simulode45 = cell(length(s),1);
 pt=cell(length(s),1);
 for i=1:length(s)    
-pt_in=eq_13_24ref.point(bifind_13_24(3));
-pt{i}=pt_in;
-pt{i}.parameter(in.r)=pt_in.parameter(in.r)+s(i); %0.5
-opts = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@(t,x)MyEvent(x));
-Fode45=@(t,X)funcs.wrap_rhs(X,pt{i}.parameter);
-rng(i)
-simulode45{i}=ode45(Fode45,[0,1e5],pt{i}.x+1e-4*rand(length(pt{i}.x),1),opts);
+    pt_in=eq_13_24ref.point(bifind_13_24(3));
+    pt{i}=pt_in;
+    pt{i}.parameter(in.r)=pt_in.parameter(in.r)+s(i); %0.5
+    opts = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@(t,x)MyEvent(x));
+    Fode45=@(t,X)funcs.wrap_rhs(X,pt{i}.parameter);
+    rng(i)
+    simulode45{i}=ode45(Fode45,[0,1e5],pt{i}.x+1e-4*rand(length(pt{i}.x),1),opts);
 end
 %%
-save('run30_ode45.mat')
+%save('run30_ode45.mat')
 %% Plotting the simulation from ode45 
 % here we plot z fully immune population ( that is y(5:8,:))
 % 12 simulations have been computed and plotted into 2 Figures 
@@ -105,15 +105,16 @@ end
 
 %%
 alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
-% cndv_13_24=[permfix('stst','p13',nstrains,'v','perm',[1,3]),..clear.
+% cndv_13_24=[permfix('stst','p13',nstrains,'v'po_br,'perm',[1,3]),..clear.
 %            permfix('stst','p24',nstrains,'v','perm',[2,4])];
 cnd_13_24=[permfix('psol','p13',nstrains,'profile','perm',[1,3]),...
            permfix('psol','p24',nstrains,'profile','perm',[2,4])];
-sim_index=6;
+sim_index=12;
 [funcs_po,po_branch,sucin]=branch_from_ode45sol(funcs,simulode45{sim_index},in.r,pt{sim_index}.parameter,...
-    'phase_condition',1,'matrix','sparse','stability.eigmatrix','sparse',parbd{:},'step',1e-7,...
-    'degree',6,'intervals',150,'newton_max_iterations',8,'print_residual_info',true,...
-    'adapt_mesh_after_correct',1,'outputfuncs',true);
+    'phase_condition',1,'matrix','sparse','stability.eigmatrix','sparse','closest',1,parbd{:},'step',1e-7,...
+    'degree',3,'intervals',500,'newton_max_iterations',8,'print_residual_info',true,...
+    'adapt_mesh_after_correct',1,'outputfuncs',true,'collocation_parameters','cheb','grid','cheb');
+%%
 figure(22)
 clf 
 hold on
