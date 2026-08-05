@@ -32,7 +32,7 @@ end
 %% for checking stability numerically
 F=sco_gen(@dengue_coco);
 FJ=F('x');
-[g_n,e_n]=deal(0.54,0.001996); % set numerical parameter values
+[g_n,e_n]=deal(0.54,0.01996); % set numerical parameter values
 par0([in.r,in.e,in.g])=...
     [    1,  e_n, g_n];
 par0=par0(:);
@@ -138,7 +138,7 @@ y34=permute(cat(3,y34{:}),[1,3,2]);
 assert(isempty(x34));
 % turns out all these equilibria have y1=y2=y3=y4
 %%
-save('stst_sym_grobner.mat')
+save('stst_sym_e_0_019.mat')
 %%
 function dpoly=poly_deg(expr,y)
 dpoly = -ones(size(expr));

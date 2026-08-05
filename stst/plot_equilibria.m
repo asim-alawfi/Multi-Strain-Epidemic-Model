@@ -2,7 +2,7 @@
 clear
 format compact
 format short g
-load('stst_sym_grobner.mat'); % needs a run of compute_equilibria_grobner first
+load('stst_sym_e_0_019.mat'); % needs a run of compute_equilibria_grobner first
 %%
 clr=lines();
 stst={...
@@ -15,30 +15,37 @@ stst={...
 [nbr,spacing]=deal(size(stst,1),30);
 lw={'LineWidth',2};
 maxunst=max([stab00(:);stab13_240(:);stab13_40(:);stab13(:);stab40g(:)]);
-comp=1;
+comp=[1,2];
 txtused=false(1,nbr);
-figure(1);clf;ax=gca;hold(ax,'on');
+figure(1);clf;tl=tiledlayout(2,1,'TileSpacing','tight');
+ax(1)=nexttile(tl,1);ax(2)=nexttile(tl,2);hold(ax(1),'on');hold(ax(2),'on');
 for i=1:nbr
     [rg,x,stab,symb,txt]=deal(stst{i,:});
     for j=1:size(x,3)
-        plot(ax,rg,squeeze(x(comp,:,j)),'-',...
-            'Color','k',lw{:},'HandleVisibility','off');
+        for pl=1:length(comp)
+            plot(ax(pl),rg,squeeze(x(comp(pl),:,j)),'-',...
+                'Color','k',lw{:},'HandleVisibility','off');
+        end
         for k=0:maxunst
             eqstab=find(stab(:,j)==k);
             spaced=eqstab(1:spacing:end);
-            plot(ax,rg(spaced),squeeze(x(comp,spaced,j)),...
-                symb,'Color',clr(k+1,:),lw{:},'HandleVisibility','off');
+            for pl=1:length(comp)
+                plot(ax(pl),rg(spaced),squeeze(x(comp(pl),spaced,j)),...
+                    symb,'Color',clr(k+1,:),lw{:},'HandleVisibility','off');
+            end
         end
     end
 end
 %% create labels for legend
 for i=1:nbr
-    plot(ax,NaN,NaN,['k',stst{i,4}],'DisplayName',stst{i,end},lw{:});
+    plot(ax(1),NaN,NaN,['k',stst{i,4}],'DisplayName',stst{i,end},lw{:});
 end
 for k=0:maxunst
-    plot(ax,NaN,NaN,'.','Color',clr(k+1,:),'DisplayName',...
+    plot(ax(1),NaN,NaN,'.','Color',clr(k+1,:),'DisplayName',...
         sprintf('#unst=%0d',k),'MarkerSize',14);
 end
-legend(ax,'Location','best');
-xlabel(ax,'$r$','Interpreter','latex');
-ylabel(ax,'$y_1$ (scaled by $e$)','Interpreter','latex');
+legend(ax(1),'Location','best');
+xlabel(ax(2),'$r$','Interpreter','latex');
+for pl=1:length(comp)
+    ylabel(ax(pl),sprintf('$y_%d$ (scaled by $e$)',pl),'Interpreter','latex');
+end

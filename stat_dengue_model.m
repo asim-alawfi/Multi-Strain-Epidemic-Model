@@ -26,7 +26,7 @@ x0=zeros(ndim,1);
 % par(in.r)=par(in.beta)/(par(in.mu)+par(in.sigma))
 par(in.e)=par(in.mu)/(par(in.mu)+par(in.sigma));
 funcs=set_symfuncs(@dengue_fever_sym,'sys_tau',@()[]);
-%% Tracking a branch of equilirium points
+%% Tracking a branch of equilibrium points
 % We impose symmetry with respect to the permutation (1234) to avoid
 % singularity along the branch
 ex1234=permfix('stst','eq1234_0',ndim,'x','perm',[1,2,3,4]);

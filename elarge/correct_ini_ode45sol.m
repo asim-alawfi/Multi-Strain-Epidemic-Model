@@ -1,0 +1,53 @@
+%% create branch of psols from dde23 sol structure
+%
+% (c) DDE-BIFTOOL v. 3.2a(126), 05/09/2016
+%
+% inputs:
+%
+% * |funcs|: functions defining right-hand side (created with set_funcs)
+% * |sol|: solutions structure output by dde23 (settled to rotation)
+% * |free_par_ind|: index of parameter to be varied along branch initially
+% * |parameters|: initial values for parameters
+%
+% Important optional inputs (name-value pairs, all passed on to )
+%
+% * |'degree'|: (default 3) degree used for collocation
+% * |'intervals'|: (default 20) number of collocation intervals (overall mesh size is
+% degree x intervals + 1
+% * |'stepcond'|: (default []) passed on to p_correc
+% * |'step'|: (default 1e-2) initial step between first two points
+% * |'corpar'|: parameters left free for initial correction (if different
+% from |free_par_ind|)
+%
+%%
+function varargout=correct_ini_ode45sol(funcs,sol,free_par_ind,parameters,varargin)
+default={'degree',4,'intervals',80,'corpar',[],'step',1e-2,'indperiod',[],'stepcond',[],...
+    'outputfuncs',false,'usercond',[],'grid','linear','correc',true};
+[options,pass_on]=dde_set_options(default,varargin,'pass_on');
+if ~isfield(sol,'xe') || length(sol.xe)<2
+    error('branch_from_sol:cross_section',...
+        'solution structure does not contain two Poincare cross section events');
+end
+period=sol.xe(end)-sol.xe(end-1);
+%%
+per0=dde_psol_create('kind','psol','parameter',parameters,'mesh',[],'degree',options.degree,'profile',[],...
+    'period',period);   
+if ~isempty(options.indperiod)
+    per0.parameter(options.indperiod)=period;
+end
+tcoarse=linspace(0,1,options.intervals+1);
+per0.mesh=dde_coll_meshfill(tcoarse,options.degree,'grid',options.grid);
+solmesh=sol.xe(end-1)+per0.mesh*per0.period;
+per0.profile=deval(sol,solmesh);
+per1=per0;
+branch0=df_brnch(funcs,free_par_ind,'psol');
+funcs=dde_add_cond('branch_from_ode45sol',funcs,options,per1);
+branch0=replace_branch_pars(branch0,free_par_ind,pass_on);
+corpar=union(options.corpar,options.indperiod);
+[branch,suc]=correct_ini(funcs,branch0,per1,corpar,options.step,options.correc);
+if ~suc
+    error('correct_ini_ode45sol:correction',...
+        '1st correction failed: suc=%d',suc);
+end
+varargout=dde_setupoutput('Setup',funcs,branch,suc,options.outputfuncs);
+end
