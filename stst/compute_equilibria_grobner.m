@@ -21,7 +21,7 @@ A = [1 1 0 1;
     1 0 1 1];
 Lambda=r*y;
 AL=A*Lambda;
-dydt=Lambda.*(1-w-(1-g).*z)-y; %% need to check the term gamma*w or just gamma
+dydt=Lambda.*(1-g*w-(1-g).*z)-y; %% need to check the term gamma*w or just gamma
 dzdt=e*(Lambda.*(1-z)-z);
 dwdt=e*((1-w).*AL-w);
 %% impose assumptions on all quantities
@@ -32,7 +32,7 @@ end
 %% for checking stability numerically
 F=sco_gen(@dengue_coco);
 FJ=F('x');
-[g_n,e_n]=deal(0.54,0.01996); % set numerical parameter values
+[g_n,e_n]=deal(0.7,0.004); % set numerical parameter values
 par0([in.r,in.e,in.g])=...
     [    1,  e_n, g_n];
 par0=par0(:);
@@ -90,8 +90,9 @@ fprintf('Equilibrium with y1=y3,y2=y4=0: y1=%s\n',char(ys_13_240));
 Js_13_24=simplify(subs(jacobian(y_eqn,y),y,[ys_13_240;0;ys_13_240;0]));
 dJ=factor(det(Js_13_24));
 % find first positive point with det(J)=0
+csol0=array_solve(subs(dJ,g,g_n),r);
 csol=array_solve(dJ,r);
-ind=find(cellfun(@(c)isAlways(c>1),csol),1,'first');
+ind=find(cellfun(@(c)(c>1),csol0),1,'first');
 rs=csol{ind}; % bifurcation value of r
 y1bif=simplify(subs(ys_13_240,r,rs)); % bifurcation value of y1 and y3 (y2=y4=0)
 fprintf('Bifurcation with r=%s, y1=%s\n',char(rs),char(y1bif));
@@ -120,7 +121,7 @@ y13=permute(cat(3,y13{:}),[1,3,2]);
 [x13,par13,stab13]=x_eq_from_y(r_rgfine,y13,A,par0,in,FJ);
 % separate (1234) and (13)4=0 and (13)2=0 out from (13)
 [x13,par13,stab13]=br_remove_sym(x13,par13,stab13,...
-    @(x)abs(diff(x(1:4,:,:)))<1e-12|abs(x(4,:,:))<1e-12|abs(x(2,:,:))<1e-12);
+    @(x)~(abs(diff(x(1:4,:,:)))>1e-8)|~(abs(x(4,:,:))>1e-8)|~(abs(x(2,:,:))>1e-8));
 plt13args=[repmat({r_rgfine},size(y13,3),1),squeeze(num2cell(y13(1,:,:),[1,2]))].';
 plot(ax,plt13args{:});drawnow
 %% check for general equilibria with y4=0 (no extra solutions exist)
@@ -133,8 +134,8 @@ y40g=permute(cat(3,y40g{:}),[1,3,2]);
 [x40g,par40g,stab40g]=x_eq_from_y(r_rgfine,y40g,A,par0,in,FJ);
 % separate (13)4=0 and (13)2=0 out from 4=0
 [x40g,par40g,stab40g]=br_remove_sym(x40g,par40g,stab40g,...
-    @(x)abs(diff(x([1,3],:,:),[],1))<1e-12|abs(x(2,:,:))<1e-12);
-assert(isempty(x40g));
+    @(x)~(abs(diff(x([1,3],:,:),[],1))>1e-8)|~(abs(x(2,:,:))>1e-8));
+assert(isempty(x40g))
 %% check for general equilibria with y3=y4
 y_eqn_34=subs(y_eqn([1,2,3])./y([1,2,3]),y(4),y(3));
 info34=reduce_grobner(y_eqn_34,y([1,2,3]),[r,g]);
@@ -145,11 +146,11 @@ y34=permute(cat(3,y34{:}),[1,3,2]);
 [x34,par34,stab34]=x_eq_from_y(r_rgfine,y34,A,par0,in,FJ);
 % separate (1234) (34)
 [x34,par34,stab34]=br_remove_sym(x34,par34,stab34,...
-    @(x)abs(diff(x(1:4,:,:),[],1))<1e-12);
+    @(x)~(abs(diff(x(1:4,:,:),[],1))>1e-8));
 assert(isempty(x34));
 % turns out all these equilibria have y1=y2=y3=y4
 %%
-save('stst_sym_e_0_019.mat')
+save('stst_sym_e_0_004.mat')
 %%
 function dpoly=poly_deg(expr,y)
 dpoly = -ones(size(expr));

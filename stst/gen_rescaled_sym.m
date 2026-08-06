@@ -18,7 +18,7 @@ A = [1 1 0 1;
     1 0 1 1];
 Lambda=r*y;
 AL=A*Lambda;
-dydt=Lambda.*(1-w-(1-g).*z)-y; %% need to check the term gamma*w or just gamma
+dydt=Lambda.*(1-g*w-(1-g).*z)-y; %% need to check the term gamma*w or just gamma
 dzdt=e*(Lambda.*(1-z)-z);
 dwdt=e*((1-w).*AL-w);
 %%

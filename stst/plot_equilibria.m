@@ -2,7 +2,7 @@
 clear
 format compact
 format short g
-load(fullfile('stst_sym_e_0_019.mat')); % needs a run of compute_equilibria_grobner first
+load(fullfile('stst_sym_e_0_004.mat')); % needs a run of compute_equilibria_grobner first
 %%
 clr=lines();
 stst={...
