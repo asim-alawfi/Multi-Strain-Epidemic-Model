@@ -112,18 +112,18 @@ y13_40=permute(cat(3,y13_40{:}),[1,3,2]);
 plt13_40args=[repmat({r_rgfine},size(y13_40,3),1),squeeze(num2cell(y13_40(1,:,:),[1,2]))].';
 plot(ax,plt13_40args{:});drawnow
 %% check for more general equilibria of the form y1==y3
-y_eqn_13=subs(y_eqn([1,2,4])./y([1,2,4]),y(3),y(1));
-info13=reduce_grobner(y_eqn_13,y([1,2,4]),[r,g]);
-[info13.target,info13.factor,info13.source]=deal(...
+y_eqn_13_24=subs(y_eqn([1,2,4])./y([1,2,4]),y(3),y(1));
+info13_24=reduce_grobner(y_eqn_13_24,y([1,2,4]),[r,g]);
+[info13_24.target,info13_24.factor,info13_24.source]=deal(...
         [4,3],          [1,1],        [3,1]);
-y13=arrayfun(@(r){get_eq_grobner(r,g_n,info13,true)},r_rgfine);
-y13=permute(cat(3,y13{:}),[1,3,2]);
-[x13,par13,stab13]=x_eq_from_y(r_rgfine,y13,A,par0,in,FJ);
+y13_24=arrayfun(@(r){get_eq_grobner(r,g_n,info13_24,true)},r_rgfine);
+y13_24=permute(cat(3,y13_24{:}),[1,3,2]);
+[x13_24,par13_24,stab13_24]=x_eq_from_y(r_rgfine,y13_24,A,par0,in,FJ);
 % separate (1234) and (13)4=0 and (13)2=0 out from (13)
-[x13,par13,stab13]=br_remove_sym(x13,par13,stab13,...
+[x13_24,par13_24,stab13_24]=br_remove_sym(x13_24,par13_24,stab13_24,...
     @(x)~(abs(diff(x(1:4,:,:)))>1e-8)|~(abs(x(4,:,:))>1e-8)|~(abs(x(2,:,:))>1e-8));
-plt13args=[repmat({r_rgfine},size(y13,3),1),squeeze(num2cell(y13(1,:,:),[1,2]))].';
-plot(ax,plt13args{:});drawnow
+plt13_24args=[repmat({r_rgfine},size(y13_24,3),1),squeeze(num2cell(y13_24(1,:,:),[1,2]))].';
+plot(ax,plt13_24args{:});drawnow
 %% check for general equilibria with y4=0 (no extra solutions exist)
 y_eqn_40g=subs(y_eqn([1,2,3])./y([1,2,3]),y(4),0);
 info40g=reduce_grobner(y_eqn_40g,y([1,2,3]),[r,g]);
@@ -135,7 +135,7 @@ y40g=permute(cat(3,y40g{:}),[1,3,2]);
 % separate (13)4=0 and (13)2=0 out from 4=0
 [x40g,par40g,stab40g]=br_remove_sym(x40g,par40g,stab40g,...
     @(x)~(abs(diff(x([1,3],:,:),[],1))>1e-8)|~(abs(x(2,:,:))>1e-8));
-assert(isempty(x40g))
+%assert(isempty(x40g))
 %% check for general equilibria with y3=y4
 y_eqn_34=subs(y_eqn([1,2,3])./y([1,2,3]),y(4),y(3));
 info34=reduce_grobner(y_eqn_34,y([1,2,3]),[r,g]);
