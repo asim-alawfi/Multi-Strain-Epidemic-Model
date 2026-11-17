@@ -4,6 +4,8 @@
 % Notation: (13)(24) means 1=3 and 2=4; (13)(2=4=0) means 1=3 and 2=4=0.
 clear
 load('Equlibria_with__branching_off.mat')
+physonly = true;   % hide points with negative prevalences (continuation beyond
+                   % the transcritical points, e.g. stars left of r=5/3)
 %% Data: (r, w_4) with w_4 = x(end)
 xpar_y2_0 = arrayfun(@(x)x.parameter(in.r),eq_y2_0.point);
 ypar_y2_0 = arrayfun(@(p)p(end).x(end),eq_y2_0.point);
@@ -14,11 +16,26 @@ ypar_1234 = arrayfun(@(p)p(end).x(end),eq_1234ref.point);
 xpar_2340 = arrayfun(@(x)x.parameter(in.r),eq_2340ref.point);
 ypar_2340 = arrayfun(@(p)p(end).x(end),eq_2340ref.point);
 
+xpar_12_340 = arrayfun(@(x)x.parameter(in.r),eq_12_340ref.point);
+ypar_12_340 = arrayfun(@(p)p(end).x(end),eq_12_340ref.point);
+
 xpar_13_240 = arrayfun(@(x)x.parameter(in.r),eq_13_240ref.point);
 ypar_13_240 = arrayfun(@(p)p(end).x(end),eq_13_240ref.point);
 
+xpar_13_40 = arrayfun(@(x)x.parameter(in.r),eq_13_40br2ref.point);
+ypar_13_40 = arrayfun(@(p)p(end).x(end),eq_13_40br2ref.point);
+
 xpar_13_24_br2 = arrayfun(@(x)x.parameter(in.r),eq_13_24_br2ref.point);
 ypar_13_24_br2 = arrayfun(@(p)p(end).x(end),eq_13_24_br2ref.point);
+
+%% Remove points with y_i<0 (NaN breaks the lines and hides the markers)
+isphys = @(br) arrayfun(@(p)all(p.x(1:4)>-1e-10),br.point) | ~physonly;
+ypar_1234(~isphys(eq_1234ref))           = NaN;
+ypar_2340(~isphys(eq_2340ref))           = NaN;
+ypar_12_340(~isphys(eq_12_340ref))       = NaN;
+ypar_13_240(~isphys(eq_13_240ref))       = NaN;
+ypar_13_40(~isphys(eq_13_40br2ref))         = NaN;
+ypar_13_24_br2(~isphys(eq_13_24_br2ref)) = NaN;
 
 %% Settings
 % colours for #unst = 0,1,2,3,>=4
@@ -41,7 +58,9 @@ ax1 = axes; hold(ax1,'on');
 plot(xpar_y2_0,      ypar_y2_0,      'k-','LineWidth',lw);
 plot(xpar_1234,      ypar_1234,      'k-','LineWidth',lw);
 plot(xpar_2340,      ypar_2340,      'k-','LineWidth',lw);
+plot(xpar_12_340,    ypar_12_340,    'k-','LineWidth',lw);
 plot(xpar_13_240,    ypar_13_240,    'k-','LineWidth',lw);
+plot(xpar_13_40,     ypar_13_40,     'k-','LineWidth',lw);
 plot(xpar_13_24_br2, ypar_13_24_br2, 'k-','LineWidth',lw);
 
 % markers coloured by #unst
@@ -57,9 +76,17 @@ i = 1:stride:numel(xpar_2340);
 scatter(xpar_2340(i), ypar_2340(i), ms, cmap(min(eq_2340tests(i),4)+1,:), ...
     'd','filled','MarkerEdgeColor','k','LineWidth',0.4);
 
+i = 1:stride:numel(xpar_12_340);
+scatter(xpar_12_340(i), ypar_12_340(i), ms, cmap(min(eq_12_340tests(i),4)+1,:), ...
+    'v','filled','MarkerEdgeColor','k','LineWidth',0.4);
+
 i = 1:stride:numel(xpar_13_240);
 scatter(xpar_13_240(i), ypar_13_240(i), ms, cmap(min(eq_13_240tests(i),4)+1,:), ...
     's','filled','MarkerEdgeColor','k','LineWidth',0.4);
+
+i = 1:stride:numel(xpar_13_40);
+scatter(xpar_13_40(i), ypar_13_40(i), ms, cmap(min(eq_13_40tests(i),4)+1,:), ...
+    '^','filled','MarkerEdgeColor','k','LineWidth',0.4);
 
 i = 1:stride:numel(xpar_13_24_br2);
 scatter(xpar_13_24_br2(i), ypar_13_24_br2(i), 1.6*ms, cmap(min(eq_13_24_br2tests(i),4)+1,:), ...
@@ -76,11 +103,14 @@ ylabel(ax1,'$w_4$','Interpreter','latex','FontSize',12);
 %% Legend 1: isotropy (marker shapes)
 h1 = plot(ax1,NaN,NaN,'ko','MarkerFaceColor','w','MarkerSize',6);
 h2 = plot(ax1,NaN,NaN,'kd','MarkerFaceColor','w','MarkerSize',6);
-h3 = plot(ax1,NaN,NaN,'ks','MarkerFaceColor','w','MarkerSize',6);
-h4 = plot(ax1,NaN,NaN,'kp','MarkerFaceColor','w','MarkerSize',8);
-h5 = plot(ax1,NaN,NaN,'k>','MarkerFaceColor','w','MarkerSize',6);
-lg1 = legend(ax1,[h1 h2 h3 h4 h5], ...
-    {'$(1{=}2{=}3{=}4{=}0)$','$(234)$','$(13)(2{=}4{=}0)$','$(13)(24)$','$(1234)$'}, ...
+h3 = plot(ax1,NaN,NaN,'kv','MarkerFaceColor','w','MarkerSize',6);
+h4 = plot(ax1,NaN,NaN,'ks','MarkerFaceColor','w','MarkerSize',6);
+h5 = plot(ax1,NaN,NaN,'k^','MarkerFaceColor','w','MarkerSize',6);
+h6 = plot(ax1,NaN,NaN,'kp','MarkerFaceColor','w','MarkerSize',8);
+h7 = plot(ax1,NaN,NaN,'k>','MarkerFaceColor','w','MarkerSize',6);
+lg1 = legend(ax1,[h1 h2 h3 h4 h5 h6 h7], ...
+    {'$(1{=}2{=}3{=}4{=}0)$','$(2{=}3{=}4{=}0)$','$(12)(3{=}4{=}0)$', ...
+     '$(13)(2{=}4{=}0)$','$(13)(4{=}0)$','$(13)(24)$','$(1234)$'}, ...
     'Interpreter','latex','FontSize',9,'Location','northwest');
 title(lg1,'isotropy','Interpreter','latex');
 
