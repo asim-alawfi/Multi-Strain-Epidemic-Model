@@ -51,17 +51,20 @@ ylabel('y_{1}');
 title('Stability Analysis of Equilibria');
 eq_y2_0=br_remove_extracolumns(eq_y2_0);
 %% Branching off, Full symmetry (1234)
+   parbd_h={'min_bound',[in.gamma, 0;  in.r,0.0],...
+    'max_bound',   [in.gamma, 1;     in.r, 30],...
+    'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
 ex_1234=permfix('stst','p1234',ndim,'x','perm',[1,2,3,4]);
 ev_1234=permfix('stst','pv1234',ndim,'v','perm',[1,2,3,4]);
 sbargs={'SetupFold.usercond',[alleq0,ev_1234],'SetupFold.initcond',[alleq0,ev_1234]};
 [fun_eq1234,eq_1234,suc_1234]=SetupStstFrom_fold(funcs,eq_y2_0,biflocation,...
-    'usercond',ex_1234,'outputfuncs',true,'print_residual_info',true,...
+    'usercond',ex_1234,'outputfuncs',true,'print_residual_info',true,parbd_h{:},...
     'step',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)});
 figure(1)
 hold on
 eq_1234=br_contn(fun_eq1234,eq_1234,1);
 eq_1234=br_rvers(eq_1234);
-eq_1234=br_contn(fun_eq1234,eq_1234,100);
+eq_1234=br_contn(fun_eq1234,eq_1234,20000);
 [eq_1234,nunst_1234]=br_stabl(fun_eq1234,eq_1234);
 [eq_1234ref,eq_1234tests,bifs_1234,bifind_1234]=MonitorChange(fun_eq1234,eq_1234,'min_iterations',5);
 %% Branch off with  y2=y3=y4=0
@@ -102,6 +105,28 @@ eq_13_240=br_contn(fun_eq13_240,eq_13_240,100);
 [eq_13_240,nunst_13_240]=br_stabl(fun_eq13_240,eq_13_240);
 [eq_13_240ref,eq_13_240tests,bifs_13_240,bifind_13_240]=...
     MonitorChange(fun_eq13_240,eq_13_240,'min_iterations',5);
+%%
+%% Branching off with y1=y2 and y3=y4=0 (adjacent pair, symmetry (12)(34))
+y3eq0=dde_sys_cond_create('name','y3_eq0','reference',false,'fun',@(x)x,'args',{'x',3});
+v3eq0=dde_sys_cond_create('name','v3_eq0','reference',false,'fun',@(x)x,'args',{'v',3});
+v4eq0=dde_sys_cond_create('name','v4_eq0','reference',false,'fun',@(x)x,'args',{'v',4});
+cndv_12=permfix('stst','pv12',nstrains,'v','perm',[1,2]);
+cnd_12=permfix('stst','p12',nstrains,'x','perm',[1,2]);
+sbargs_12={'SetupFold.usercond',[alleq0,cndv_12,v3eq0,v4eq0],'SetupFold.initcond',[alleq0,cndv_12]};
+[fun_eq12_340,eq_12_340,suc_12]=SetupStstFrom_fold(funcs,eq_y2_0,biflocation,...
+    'usercond',[cnd_12,cndv_12,y3eq0,y4eq0],'initcond',[cnd_12,cndv_12],'outputfuncs',true,...
+    'step',0.1,sbargs_12{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},...
+    'print_residual_info',true,parbd{:});
+fprintf('Branch off from r=1 with y1=y2, y3=y4=0 (adjacent pair)\n');
+eq_12_340.point(2).x(1:4,:)
+figure(1)
+hold on
+eq_12_340=br_contn(fun_eq12_340,eq_12_340,1);
+eq_12_340=br_rvers(eq_12_340);
+eq_12_340=br_contn(fun_eq12_340,eq_12_340,100);
+[eq_12_340,nunst_12_340]=br_stabl(fun_eq12_340,eq_12_340);
+[eq_12_340ref,eq_12_340tests,bifs_12_340,bifind_12_340]=...
+    MonitorChange(fun_eq12_340,eq_12_340,'min_iterations',5);
 %%  Second Branching Off (13)(24)
 cndv_13_24=[permfix('stst','pv13',nstrains,'v','perm',[1,3]),...
            permfix('stst','pv24',nstrains,'v','perm',[2,4])];
@@ -114,7 +139,6 @@ sbargs_13_br2={'SetupFold.usercond',[cndv_13_24],'SetupFold.initcond',[cndv_13_2
     'print_residual_info',true,parbd{:});
 fprintf('Branch off from symmetry breaking, ~ (13)(24) symmetry\n');
 eq_13_24_br2.point(2).x(1:4,:)
-%%
 figure(1)
 hold on
 eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,30);
@@ -122,6 +146,29 @@ eq_13_24_br2=br_rvers(eq_13_24_br2);
 eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,30);
 [eq_13_24_br2ref,eq_13_24_br2tests,bifs_13_24,bifind_13_24]=...
     MonitorChange(fun_eq13_br2,eq_13_24_br2,'min_iterations',5);
+%%
+%% Branch with y1=y3 and y4=0, label (13)(4=0)
+y4eq0=dde_sys_cond_create('name','y4_eq0','reference',false,'fun',@(x)x,'args',{'x',4});
+v24anti=dde_sys_cond_create('name','v24_anti','reference',false,'fun',@(v)v(1,:)+v(2,:),'args',{'v',[2,4]});
+cndv_13=permfix('stst','pv13',nstrains,'v','perm',[1,3]);
+cnd_13=permfix('stst','p13',nstrains,'x','perm',[1,3]);
+sbargs_13_40={'SetupFold.usercond',[cnd_13,y4eq0,cndv_13,v24anti],...
+              'SetupFold.initcond',[cnd_13,y4eq0,cndv_13,v24anti]};
+[fun_eq13_40,eq_13_40br2,suc_13_40]=SetupStstFrom_fold(funcs,eq_13_240ref,bifind_13_240(3),...
+    'usercond',[cnd_13,y4eq0],'outputfuncs',true,...
+    'step',0.1,sbargs_13_40{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},...
+    'print_residual_info',true,parbd{:});
+fprintf('Branch off from symmetry breaking, keeping (13)(4=0)\n');
+eq_13_40br2.point(2).x(1:4,:)
+figure(1)
+hold on
+if eq_13_40br2.point(2).x(2)<0  % first step went to y2<0 (r<r_s): turn around
+    eq_13_40br2=br_rvers(eq_13_40br2);
+end
+eq_13_40br2=br_contn(fun_eq13_40,eq_13_40br2,20);
+[eq_13_40br2,nunst_13_40]=br_stabl(fun_eq13_40,eq_13_40br2);
+[eq_13_40br2ref,eq_13_40tests,bifs_13_40,bifind_13_40]=...
+    MonitorChange(fun_eq13_40,eq_13_40br2,'min_iterations',5);
 %%
 
 eq_1234ref=br_remove_extracolumns(eq_1234ref);
@@ -131,7 +178,10 @@ eq_2340=br_remove_extracolumns(eq_2340);
 eq_13_240ref=br_remove_extracolumns(eq_13_240ref);
 eq_13_240=br_remove_extracolumns(eq_13_240);
 eq_13_24_br2ref=br_remove_extracolumns(eq_13_24_br2ref)
-
+eq_12_340=br_remove_extracolumns(eq_12_340);
+eq_12_340ref=br_remove_extracolumns(eq_12_340ref)
+eq_13_40br2ref=br_remove_extracolumns(eq_13_40br2ref);
+eq_13_40br2=br_remove_extracolumns(eq_13_40br2);
 %%
 xpar_y2_0=arrayfun(@(x)x.parameter(in.r),eq_y2_0.point);
 ypar_y2_0=arrayfun(@(p)p(end).x(end),eq_y2_0.point);
@@ -153,6 +203,10 @@ ypar_13_240=arrayfun(@(p)p(end).x(end),eq_13_240ref.point);
 
 xpar_13_24_br2=arrayfun(@(x)x.parameter(in.r),eq_13_24_br2ref.point);
 ypar_13_24_br2=arrayfun(@(p)p(end).x(end),eq_13_24_br2ref.point);
+xpar_12_340=arrayfun(@(x)x.parameter(in.r),eq_12_340ref.point);
+ypar_12_340=arrayfun(@(p)p(end).x(end),eq_12_340ref.point);
+xpar_13_40=arrayfun(@(x)x.parameter(in.r),eq_13_40br2ref.point);
+ypar_13_40=arrayfun(@(p)p(end).x(end),eq_13_40br2ref.point);
 %%
 save('Equlibria_with__branching_off.mat')
 %%
@@ -168,26 +222,12 @@ plot(xpar_1234(eq_1234tests>=1),ypar_1234(eq_1234tests>=1),'-','LineWidth',2)
 plot(xpar_2340(eq_2340tests>=1),ypar_2340(eq_2340tests>=1),'LineWidth',2)
 plot(xpar_13_240(eq_13_240tests==0),ypar_13_240(eq_13_240tests==0),'-','LineWidth',1)
 plot(xpar_13_240(eq_13_240tests>=1),ypar_13_240(eq_13_240tests>=1),'.','LineWidth',1)
-
+plot(xpar_12_340,ypar_12_340,'-','LineWidth',2) 
 plot(xpar_13_24_br2,ypar_13_24_br2,'.','LineWidth',2) 
+plot(xpar_13_40,ypar_13_40,'-','LineWidth',2) 
+xlim([0.5,3])
+%% %%%%%
 
 
 
-%% Trying to compute the branch with respect to (13) and y4=0
-y4eq0=dde_sys_cond_create('name','y4_eq0','reference',false,'fun',@(x)x,'args',{'x',4});
-y4veq0=dde_sys_cond_create('name','y4_v0','reference',false,'fun',@(x)x,'args',{'v',4});
-%alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
-cndv_13=[permfix('stst','pv13',nstrains,'v','perm',[1,3])];
-cnd_13=[permfix('stst','p13',nstrains,'x','perm',[1,3])];
-sbargs_13_br2={'SetupFold.usercond',[y4eq0,cnd_13,cndv_13],'SetupFold.initcond',[y4veq0,y4eq0,cndv_13]};
-[fun_eq13_br2,eq_13_br2,suc_13br2]=SetupStstFrom_fold(funcs,eq_13_240ref,bifind_13_240(3),...
-    'usercond',[cnd_13,y4eq0],'initcond',[cnd_13],'outputfuncs',true,...
-    'step',0.1,sbargs_13_br2{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},...
-    'print_residual_info',true,parbd{:});
-fprintf('Branch off from symmetry breaking, ~ (13)(24) symmetry\n');
-eq_13_br2.point(2).x(1:4,:)
-%%
-figure(1)
-hold on
-eq_13_br2=br_contn(fun_eq13_br2,eq_13_br2,20);
 
