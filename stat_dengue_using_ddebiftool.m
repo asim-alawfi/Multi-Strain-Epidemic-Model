@@ -12,7 +12,7 @@ par([in.r,      in.e,     in.beta,        in.mu,      in.sigma,     in.gamma,  i
 [nstrains,nvar]=deal(4,3);
 ndim=nstrains*nvar;
 x0=zeros(ndim,1); % x is nstrains x nvar
-    parbd={'min_bound',[in.gamma, 0;  in.r,0.0],...
+    parbd0={'min_bound',[in.gamma, 0;  in.r,0.0],...
     'max_bound',   [in.gamma, 1;     in.r, 3.5],...
     'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
 %%
@@ -24,7 +24,7 @@ funcs=set_symfuncs(@dengue_fever_sym,'sys_tau',@()[]);
 alleq0=dde_sys_cond_create('name','all_eq0','reference',false,'fun',@(x)x,'args',{'x',1:ndim});
 [fun_y2_0,eq_y2_0,suc0]=SetupStst(funcs,...
     'parameter',par,'x',x0,...
-    'contpar',in.r,'step',0.05,parbd{:},...
+    'contpar',in.r,'step',0.1,parbd0{:},...
     'extracolumns','auto','extra_condition',true,...
     'usercond',alleq0,'outputfuncs',true);
 figure(1)
@@ -51,9 +51,9 @@ ylabel('y_{1}');
 title('Stability Analysis of Equilibria');
 eq_y2_0=br_remove_extracolumns(eq_y2_0);
 %% Branching off, Full symmetry (1234)
-   parbd_h={'min_bound',[in.gamma, 0;  in.r,0.0],...
+   parbd_h={'min_bound',[in.gamma, 0;  in.r,1],...
     'max_bound',   [in.gamma, 1;     in.r, 30],...
-    'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
+    'max_step',    [in.gamma, 0.05;   in.r, 0.1; 0,0.1]};
 ex_1234=permfix('stst','p1234',ndim,'x','perm',[1,2,3,4]);
 ev_1234=permfix('stst','pv1234',ndim,'v','perm',[1,2,3,4]);
 sbargs={'SetupFold.usercond',[alleq0,ev_1234],'SetupFold.initcond',[alleq0,ev_1234]};
@@ -62,12 +62,15 @@ sbargs={'SetupFold.usercond',[alleq0,ev_1234],'SetupFold.initcond',[alleq0,ev_12
     'step',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)});
 figure(1)
 hold on
-eq_1234=br_contn(fun_eq1234,eq_1234,1);
+eq_1234=br_contn(fun_eq1234,eq_1234,1000);
 eq_1234=br_rvers(eq_1234);
-eq_1234=br_contn(fun_eq1234,eq_1234,20000);
+eq_1234=br_contn(fun_eq1234,eq_1234,1000);
 [eq_1234,nunst_1234]=br_stabl(fun_eq1234,eq_1234);
 [eq_1234ref,eq_1234tests,bifs_1234,bifind_1234]=MonitorChange(fun_eq1234,eq_1234,'min_iterations',5);
 %% Branch off with  y2=y3=y4=0
+parbd={'min_bound',[in.gamma, 0;  in.r,1],...
+    'max_bound',   [in.gamma, 1;     in.r, 3.5],...
+    'max_step',    [in.gamma, 0.05;   in.r, 0.05; 0,0.05]};
 cndv_2340=[permfix('stst','pv2340',nstrains,'v','perm',[2,3,4])];
 cnd_2340=[permfix('stst','p2340',nstrains,'x','perm',[2,3,4])];
 ye234q0=dde_sys_cond_create('name','y24_eq0','reference',false,'fun',@(x)x,'args',{'x',2:4});
@@ -80,7 +83,7 @@ figure(1)
 hold on
 eq_2340=br_contn(fun_eq2340,eq_2340,100);
 eq_2340=br_rvers(eq_2340);
-eq_2340=br_contn(fun_eq2340,eq_2340,1);
+eq_2340=br_contn(fun_eq2340,eq_2340,100);
 [eq_2340ref,eq_2340tests,bifs_2340,bifind_2340]=...
     MonitorChange(fun_eq2340,eq_2340,'min_iterations',5);
 %%
@@ -95,13 +98,13 @@ sbargs={'SetupFold.usercond',[alleq0,cndv_13,y2v0],'SetupFold.initcond',[alleq0,
     'usercond',[cnd_13,cndv_13,y4eq0,y2eq0],'initcond',[cnd_13,cndv_13],'outputfuncs',true,...
     'step',0.1,sbargs{:},'plot_measure',{@(p)p(end).parameter(in.r),@(p)p(end).x(end)},...
     'print_residual_info',true,parbd{:});
-%%
+%
 eq_13_240.point(2).x(1:4,:)
 figure(1)
 hold on
-eq_13_240=br_contn(fun_eq13_240,eq_13_240,1);
-eq_13_240=br_rvers(eq_13_240);
 eq_13_240=br_contn(fun_eq13_240,eq_13_240,100);
+eq_13_240=br_rvers(eq_13_240);
+eq_13_240=br_contn(fun_eq13_240,eq_13_240,200);
 [eq_13_240,nunst_13_240]=br_stabl(fun_eq13_240,eq_13_240);
 [eq_13_240ref,eq_13_240tests,bifs_13_240,bifind_13_240]=...
     MonitorChange(fun_eq13_240,eq_13_240,'min_iterations',5);
@@ -121,7 +124,7 @@ fprintf('Branch off from r=1 with y1=y2, y3=y4=0 (adjacent pair)\n');
 eq_12_340.point(2).x(1:4,:)
 figure(1)
 hold on
-eq_12_340=br_contn(fun_eq12_340,eq_12_340,1);
+eq_12_340=br_contn(fun_eq12_340,eq_12_340,200);
 eq_12_340=br_rvers(eq_12_340);
 eq_12_340=br_contn(fun_eq12_340,eq_12_340,100);
 [eq_12_340,nunst_12_340]=br_stabl(fun_eq12_340,eq_12_340);
@@ -141,9 +144,9 @@ fprintf('Branch off from symmetry breaking, ~ (13)(24) symmetry\n');
 eq_13_24_br2.point(2).x(1:4,:)
 figure(1)
 hold on
-eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,30);
+eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,20);
 eq_13_24_br2=br_rvers(eq_13_24_br2);
-eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,30);
+eq_13_24_br2=br_contn(fun_eq13_br2,eq_13_24_br2,20);
 [eq_13_24_br2ref,eq_13_24_br2tests,bifs_13_24,bifind_13_24]=...
     MonitorChange(fun_eq13_br2,eq_13_24_br2,'min_iterations',5);
 %%
@@ -208,7 +211,7 @@ ypar_12_340=arrayfun(@(p)p(end).x(end),eq_12_340ref.point);
 xpar_13_40=arrayfun(@(x)x.parameter(in.r),eq_13_40br2ref.point);
 ypar_13_40=arrayfun(@(p)p(end).x(end),eq_13_40br2ref.point);
 %%
-save('Equlibria_with__branching_off.mat')
+
 %%
 figure(1500)
 clf;
@@ -227,7 +230,8 @@ plot(xpar_13_24_br2,ypar_13_24_br2,'.','LineWidth',2)
 plot(xpar_13_40,ypar_13_40,'-','LineWidth',2) 
 xlim([0.5,3])
 %% %%%%%
-
-
+save('Equlibria_with__branching_off.mat')
+%% Bifurcation points detected by MonitorChange: r, type, stability change
+% 
 
 

@@ -1,11 +1,7 @@
 %% Bifurcation diagram in the (r, w_4)-plane (run after the continuation script)
-% Marker shape = isotropy type, marker colour = number of unstable
-% eigenvalues (#unst = 0 stable, >0 unstable).
-% Notation: (13)(24) means 1=3 and 2=4; (13)(2=4=0) means 1=3 and 2=4=0.
 clear
 load('Equlibria_with__branching_off.mat')
-physonly = true;   % hide points with negative prevalences (continuation beyond
-                   % the transcritical points, e.g. stars left of r=5/3)
+physonly = true; 
 %% Data: (r, w_4) with w_4 = x(end)
 xpar_y2_0 = arrayfun(@(x)x.parameter(in.r),eq_y2_0.point);
 ypar_y2_0 = arrayfun(@(p)p(end).x(end),eq_y2_0.point);
@@ -132,6 +128,6 @@ drawnow;
 p1 = lg1.Position;  p2 = lg2.Position;
 lg2.Position = [p1(1)+p1(3)+0.01, p1(2)+p1(4)-p2(4), p2(3), p2(4)];
 
-% %% Export
-% exportgraphics(gcf,'multistrain_r_w4.pdf','ContentType','vector');
+%% Export
+ exportgraphics(gcf,'multistrain_r_w4.pdf','ContentType','vector');
 % exportgraphics(gcf,'multistrain_r_w4.png','Resolution',600);
